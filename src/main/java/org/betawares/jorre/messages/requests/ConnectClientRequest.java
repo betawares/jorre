@@ -25,6 +25,7 @@ import java.util.UUID;
 import org.betawares.jorre.CommunicationException;
 import org.betawares.jorre.DisconnectReason;
 import org.betawares.jorre.Server;
+import org.betawares.jorre.ServerInterface;
 import org.betawares.jorre.Version;
 import org.betawares.jorre.messages.responses.ConnectClientResponse;
 
@@ -48,7 +49,7 @@ public class ConnectClientRequest extends Request {
     }
     
     @Override
-    public void handle(Server server, ChannelHandlerContext ctx) throws CommunicationException {
+    public void handle(ServerInterface server, ChannelHandlerContext ctx) throws CommunicationException {
         Version version = server.version();
         if (version.compareTo(clientVersion) == 0) {
             server.addClient(clientId, ctx.channel().id());

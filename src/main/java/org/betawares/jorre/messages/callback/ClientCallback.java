@@ -19,6 +19,7 @@
 package org.betawares.jorre.messages.callback;
 
 import org.betawares.jorre.Client;
+import org.betawares.jorre.ClientInterface;
 import org.betawares.jorre.messages.Message;
 
 /**
@@ -26,7 +27,7 @@ import org.betawares.jorre.messages.Message;
  * 
  * @param <C> the type of Client that will be passed to the handle method
  */
-public abstract class ClientCallback<C extends Client> extends Message {
+public abstract class ClientCallback<C extends ClientInterface> extends Message {
     
     /**
      * Handler for client callbacks.

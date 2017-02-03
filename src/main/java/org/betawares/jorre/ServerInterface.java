@@ -15,37 +15,36 @@
  * OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR 
  * PERFORMANCE OF THIS SOFTWARE.
  */
+package org.betawares.jorre;
 
-package org.betawares.jorre.messages.responses;
-
+import io.netty.channel.ChannelId;
 import java.util.UUID;
-import org.betawares.jorre.Client;
-import org.betawares.jorre.ClientInterface;
-import org.betawares.jorre.messages.Message;
 
 /**
- * Base class for all responses that will be returned to a {@link Client} in response
- * to a {@link Request}
- * 
- * @param <C> the type of {@link Client} that will be passed to the handler
+ *  
  */
-public abstract class ClientResponse<C extends ClientInterface> extends Message {
+public interface ServerInterface {
     
-    private UUID id;
+    Version version();
     
-    public UUID id() {
-        return id;
-    }
+    public void addClient(UUID clientId, ChannelId channelId) throws CommunicationException;
     
-    public void id(UUID id) {
-        this.id = id;
-    }
-
+    public void disconnectClient(ChannelId channelId, DisconnectReason reason) throws CommunicationException;
+    
     /**
-     * Handles client side processing for the {@link ClientResponse} 
+     * Inform server that a client has been removed.
      * 
-     * @param client object that extends {@link Client} that can be referenced by the handler
+     * This is a good place to perform any addition cleanup
+     * 
+     * @param channelId     id of the client that was removed
      */
-    public abstract void handle(C client);
+    public void clientRemoved(ChannelId channelId);
+    
+    /**
+     * Inform server that it has been shutdown.  
+     * 
+     * This is a good place to perform any addition cleanup, i.e. close database connections, etc.
+     */
+    public void serverShutdown();
     
 }

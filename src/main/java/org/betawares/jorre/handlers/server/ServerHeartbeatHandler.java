@@ -73,14 +73,14 @@ public class ServerHeartbeatHandler extends ChannelInboundHandlerAdapter {
         }
     }
     
-    @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) {
-        if (msg instanceof PongMessage) {
-            long milliSeconds = TimeUnit.MILLISECONDS.convert(System.nanoTime() - startTime, TimeUnit.NANOSECONDS);
-            server.pingTime(ctx.channel().id(), milliSeconds);
-        }
-        ctx.fireChannelRead(msg);
-    }
+//    @Override
+//    public void channelRead(ChannelHandlerContext ctx, Object msg) {
+//        if (msg instanceof PongMessage) {
+//            long milliSeconds = TimeUnit.MILLISECONDS.convert(System.nanoTime() - startTime, TimeUnit.NANOSECONDS);
+//            server.pingTime(ctx.channel().id(), milliSeconds);
+//        }
+//        ctx.fireChannelRead(msg);
+//    }
 
     /**
      * Send a ping message to the client.

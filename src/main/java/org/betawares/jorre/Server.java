@@ -64,7 +64,7 @@ import org.betawares.jorre.messages.callback.ClientCallback;
  * Uses Netty (see <a href="http://netty.io">http://netty.io</a>).
  *
  */
-public abstract class Server {
+public abstract class Server implements ServerInterface {
 
     protected static final Logger logger = Logger.getLogger(Server.class);
 
@@ -105,6 +105,7 @@ public abstract class Server {
      * 
      * @return the {@link Version} of the {@link Server} implementation
      */
+    @Override
     public Version version() {
         return version;
     }
@@ -273,30 +274,4 @@ public abstract class Server {
 
     }
 
-    /**
-     * Inform server that a client has been removed.
-     * 
-     * This is a good place to perform any addition cleanup
-     * 
-     * @param channelId     id of the client that was removed
-     */
-    public abstract void clientRemoved(ChannelId channelId);
-    
-    /**
-     * Inform server that it has been shutdown.  
-     * 
-     * This is a good place to perform any addition cleanup, i.e. close database connections, etc.
-     */
-    public abstract void serverShutdown();
-    
-    /**
-     * Inform server of the length of time for a ping to complete
-     * 
-     * @param channelId     id of the client that was pinged
-     * @param milliSeconds  length of time in milliseconds for the ping to complete
-     */
-    public void pingTime(ChannelId channelId, long milliSeconds) {
-        // do nothing by default
-    }
-    
 }

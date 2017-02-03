@@ -23,6 +23,7 @@ import java.util.UUID;
 import org.apache.log4j.Logger;
 import org.betawares.jorre.CommunicationException;
 import org.betawares.jorre.Server;
+import org.betawares.jorre.ServerInterface;
 import org.betawares.jorre.messages.Message;
 
 /**
@@ -33,7 +34,7 @@ import org.betawares.jorre.messages.Message;
  *  
  * @param <S> the type of Server that will be processing the Message
  */
-public abstract class ServerMessage<S extends Server> extends Message {
+public abstract class ServerMessage<S extends ServerInterface> extends Message {
         
     protected static final Logger logger = Logger.getLogger(ServerMessage.class);
 

@@ -15,37 +15,25 @@
  * OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR 
  * PERFORMANCE OF THIS SOFTWARE.
  */
-
-package org.betawares.jorre.messages.responses;
-
-import java.util.UUID;
-import org.betawares.jorre.Client;
-import org.betawares.jorre.ClientInterface;
-import org.betawares.jorre.messages.Message;
+package org.betawares.jorre;
 
 /**
- * Base class for all responses that will be returned to a {@link Client} in response
- * to a {@link Request}
- * 
- * @param <C> the type of {@link Client} that will be passed to the handler
+ *
  */
-public abstract class ClientResponse<C extends ClientInterface> extends Message {
-    
-    private UUID id;
-    
-    public UUID id() {
-        return id;
-    }
-    
-    public void id(UUID id) {
-        this.id = id;
-    }
+public interface ClientInterface {
+
+    Version version();
+    /**
+     * Inform the client that it has been disconnected.
+     * 
+     * @param reason reason that the client was disconnected
+     * @param error was the disconnection due to an error
+     */
+    public void disconnected(DisconnectReason reason, boolean error);
 
     /**
-     * Handles client side processing for the {@link ClientResponse} 
-     * 
-     * @param client object that extends {@link Client} that can be referenced by the handler
+     * Inform the client that it has been connected to a server.
      */
-    public abstract void handle(C client);
-    
+    public void connected();
+
 }

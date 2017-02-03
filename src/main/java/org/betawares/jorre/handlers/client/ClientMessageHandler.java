@@ -27,6 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.apache.log4j.Logger;
 import org.betawares.jorre.Client;
+import org.betawares.jorre.ClientInterface;
 import org.betawares.jorre.CommunicationException;
 import org.betawares.jorre.DisconnectReason;
 import org.betawares.jorre.messages.Message;
@@ -46,7 +47,7 @@ import org.betawares.jorre.messages.responses.ResponseFuture;
  * 
  * @param <C> the type of {@link Client} that will handle messages
  */
-public final class ClientMessageHandler<C extends Client> extends SimpleChannelInboundHandler<Message> {
+public final class ClientMessageHandler<C extends ClientInterface> extends SimpleChannelInboundHandler<Message> {
 
     private static final Logger logger = Logger.getLogger(ClientMessageHandler.class);
     

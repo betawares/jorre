@@ -56,7 +56,7 @@ import org.betawares.jorre.messages.responses.ResponseFuture;
  * Uses Netty (see <a href="http://netty.io">http://netty.io</a>).
  * 
  */
-public abstract class Client {
+public abstract class Client implements ClientInterface {
 
     private static final Logger logger = Logger.getLogger(Client.class);
 
@@ -149,19 +149,6 @@ public abstract class Client {
             disconnect(DisconnectReason.IOError, true);
         }
     }
-
-    /**
-     * Inform the client that it has been disconnected.
-     * 
-     * @param reason reason that the client was disconnected
-     * @param error was the disconnection due to an error
-     */
-    public abstract void disconnected(DisconnectReason reason, boolean error);
-
-    /**
-     * Inform the client that it has been connected to a server.
-     */
-    public abstract void connected();
 
     /**
      * Disconnect the client from the server.  Use this for deliberate user initiated disconnects

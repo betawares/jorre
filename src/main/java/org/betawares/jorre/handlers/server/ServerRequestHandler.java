@@ -24,6 +24,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import org.apache.log4j.Logger;
 import org.betawares.jorre.CommunicationException;
 import org.betawares.jorre.Server;
+import org.betawares.jorre.ServerInterface;
 import org.betawares.jorre.messages.requests.ServerMessage;
 import org.betawares.jorre.messages.requests.Request;
 
@@ -37,7 +38,7 @@ import org.betawares.jorre.messages.requests.Request;
  * @param <S> the type of Server that will handle requests
  */
 @Sharable
-public class ServerRequestHandler<S extends Server> extends SimpleChannelInboundHandler<ServerMessage<S>> {
+public class ServerRequestHandler<S extends ServerInterface> extends SimpleChannelInboundHandler<ServerMessage<S>> {
             
     private static final Logger logger = Logger.getLogger(ServerRequestHandler.class);
 

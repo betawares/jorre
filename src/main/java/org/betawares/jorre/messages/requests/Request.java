@@ -22,8 +22,10 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import org.betawares.jorre.Client;
+import org.betawares.jorre.ClientInterface;
 import org.betawares.jorre.CommunicationException;
 import org.betawares.jorre.Server;
+import org.betawares.jorre.ServerInterface;
 import org.betawares.jorre.messages.responses.ClientResponse;
 
 /**
@@ -38,7 +40,7 @@ import org.betawares.jorre.messages.responses.ClientResponse;
  * @param <S> the type of Server that will be generating the response
  * @param <C> the type of Client that will be processing the response
  */
-public abstract class Request<S extends Server, C extends Client> extends ServerMessage<S> {
+public abstract class Request<S extends ServerInterface, C extends ClientInterface> extends ServerMessage<S> {
         
     /**
      * Send a response to the {@link Client}.
