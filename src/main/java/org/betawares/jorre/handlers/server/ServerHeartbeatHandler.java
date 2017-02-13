@@ -29,7 +29,7 @@ import org.apache.log4j.Logger;
 import org.betawares.jorre.DisconnectReason;
 import org.betawares.jorre.messages.PingMessage;
 import org.betawares.jorre.messages.PongMessage;
-import org.betawares.jorre.Server;
+import org.betawares.jorre.ServerInterface;
 
 /**
  * Handles timeout events raised by the {@link IdleStateHandler} which is added to the {@link Server} pipeline.  
@@ -47,9 +47,9 @@ public class ServerHeartbeatHandler extends ChannelInboundHandlerAdapter {
     private ChannelHandlerContext ctx;
     private long startTime;
     
-    private final Server server;
+    private final ServerInterface server;
     
-    public ServerHeartbeatHandler (Server server) {
+    public ServerHeartbeatHandler (ServerInterface server) {
         this.server = server;
     }
 

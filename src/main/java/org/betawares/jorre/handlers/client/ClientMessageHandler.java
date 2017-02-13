@@ -52,11 +52,11 @@ public final class ClientMessageHandler<C extends ClientInterface> extends Simpl
     private static final Logger logger = Logger.getLogger(ClientMessageHandler.class);
     
     private ChannelHandlerContext ctx;
-    private final Client client;
+    private final C client;
     // keep a list of all pending responses
     private final ConcurrentMap<UUID, ResponseFuture> responseMap = new ConcurrentHashMap<>();
     
-    public ClientMessageHandler(Client client) {
+    public ClientMessageHandler(C client) {
         this.client = client;
     }
 

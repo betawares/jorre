@@ -17,12 +17,20 @@
  */
 package org.betawares.jorre;
 
+import java.util.UUID;
+
 /**
  *
  */
 public interface ClientInterface {
 
+    /**
+     * Returns the client version.
+     * 
+     * @return Returns the version of this {@link Client}.
+     */
     Version version();
+    
     /**
      * Inform the client that it has been disconnected.
      * 
@@ -35,5 +43,26 @@ public interface ClientInterface {
      * Inform the client that it has been connected to a server.
      */
     public void connected();
+    
+    /**
+     * Disconnect the client from the server.  Use this for deliberate user initiated disconnects
+     */
+    default public void disconnect() {
+        disconnect(DisconnectReason.UserDisconnect, false);
+    }
+    
+    /**
+     * Disconnect the client from the server.
+     * 
+     * @param reason reason for disconnecting the client
+     * @param error is this in response to an error
+     */
+    public void disconnect(DisconnectReason reason, boolean error);
 
+    /**
+     * Returns the client id.
+     * 
+     * @return Returns the globally unique identifier of this {@link Client}.
+     */
+    public UUID id();
 }

@@ -27,6 +27,7 @@ import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 import org.apache.log4j.Logger;
 import org.betawares.jorre.Client;
+import org.betawares.jorre.ClientInterface;
 import org.betawares.jorre.DisconnectReason;
 import org.betawares.jorre.CommunicationException;
 import org.betawares.jorre.messages.PingMessage;
@@ -47,9 +48,9 @@ public class ClientHeartbeatHandler extends ChannelInboundHandlerAdapter {
     private static final PingMessage PING = new PingMessage();
 
     private ChannelHandlerContext ctx;
-    private final Client client;
+    private final ClientInterface client;
     
-    public ClientHeartbeatHandler(Client client) {
+    public ClientHeartbeatHandler(ClientInterface client) {
         this.client = client;
     }
     

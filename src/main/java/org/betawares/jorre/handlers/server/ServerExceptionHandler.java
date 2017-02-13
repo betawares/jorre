@@ -25,7 +25,7 @@ import io.netty.channel.ChannelHandlerContext;
 import org.apache.log4j.Logger;
 import org.betawares.jorre.CommunicationException;
 import org.betawares.jorre.DisconnectReason;
-import org.betawares.jorre.Server;
+import org.betawares.jorre.ServerInterface;
 
 /**
  * Handles server-side exceptions that are not explicitly handled.
@@ -36,9 +36,9 @@ public class ServerExceptionHandler extends ChannelHandlerAdapter {
 
     private static final Logger logger = Logger.getLogger(ServerExceptionHandler.class);
     
-    private final Server server;
+    private final ServerInterface server;
 
-    public ServerExceptionHandler(Server server) {
+    public ServerExceptionHandler(ServerInterface server) {
         this.server = server;
     }
     

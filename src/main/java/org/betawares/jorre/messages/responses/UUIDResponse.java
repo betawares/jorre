@@ -20,13 +20,14 @@ package org.betawares.jorre.messages.responses;
 
 import java.util.UUID;
 import org.betawares.jorre.Client;
+import org.betawares.jorre.ClientInterface;
 
 /**
  * A {@link ClientResponse} that returns a {@link UUID} value.
  * 
  * @param <C> the type of {@link Client} that will be passed to the handler
  */
-public class UUIDResponse<C extends Client> extends ClientResponse<C> {
+public class UUIDResponse<C extends ClientInterface> extends ClientResponse<C> {
     
     private final UUID uuid;
     

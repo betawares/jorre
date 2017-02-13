@@ -19,6 +19,7 @@
 package org.betawares.jorre.messages.responses;
 
 import org.betawares.jorre.Client;
+import org.betawares.jorre.ClientInterface;
 import org.betawares.jorre.DisconnectReason;
 import org.betawares.jorre.Version;
 import org.betawares.jorre.CommunicationException;
@@ -28,7 +29,7 @@ import org.betawares.jorre.CommunicationException;
  * 
  * @param <C> type of {@link Client} that will be passed to the handler
  */
-public class ConnectClientResponse<C extends Client> extends ClientResponse<C> {
+public class ConnectClientResponse<C extends ClientInterface> extends ClientResponse<C> {
     
     private final Version version;
     

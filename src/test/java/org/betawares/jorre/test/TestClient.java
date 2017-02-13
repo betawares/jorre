@@ -2,6 +2,7 @@ package org.betawares.jorre.test;
 
 import org.apache.log4j.Logger;
 import org.betawares.jorre.Client;
+import org.betawares.jorre.ClientInterface;
 import org.betawares.jorre.DisconnectReason;
 import org.betawares.jorre.Version;
 import org.betawares.jorre.CommunicationException;
@@ -11,7 +12,7 @@ import org.betawares.jorre.handlers.client.ClientHeartbeatHandler;
  *
  * @author BetaSteward
  */
-public class TestClient extends Client {
+public class TestClient extends Client implements ClientInterface {
     private static final Logger logger = Logger.getLogger(TestClient.class);
 
     private Boolean test;

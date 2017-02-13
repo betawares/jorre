@@ -18,14 +18,14 @@
 
 package org.betawares.jorre.messages.responses;
 
-import org.betawares.jorre.Client;
+import org.betawares.jorre.ClientInterface;
 
 /**
  * A {@link ClientResponse} that returns a boolean value.
  * 
  * @param <C> the type of {@link Client} that will be passed to the handler
  */
-public class BooleanResponse<C extends Client> extends ClientResponse<C> {
+public class BooleanResponse<C extends ClientInterface> extends ClientResponse<C> {
     
     private final boolean b;
     

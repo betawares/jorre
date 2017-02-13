@@ -149,20 +149,8 @@ public abstract class Client implements ClientInterface {
             disconnect(DisconnectReason.IOError, true);
         }
     }
-
-    /**
-     * Disconnect the client from the server.  Use this for deliberate user initiated disconnects
-     */
-    public void disconnect() {
-        disconnect(DisconnectReason.UserDisconnect, false);
-    }
     
-    /**
-     * Disconnect the client from the server.
-     * 
-     * @param reason reason for disconnecting the client
-     * @param error is this in response to an error
-     */
+    @Override
     public void disconnect(DisconnectReason reason, boolean error) {
 
         try {
@@ -226,11 +214,7 @@ public abstract class Client implements ClientInterface {
         }
     }
     
-    /**
-     * Returns the client id.
-     * 
-     * @return Returns the globally unique identifier of this {@link Client}.
-     */
+    @Override
     public UUID id() {
         return id;
     }
@@ -244,11 +228,6 @@ public abstract class Client implements ClientInterface {
         return channel;
     }
 
-    /**
-     * Returns the client version.
-     * 
-     * @return Returns the version of this {@link Client}.
-     */
     public Version version() {
         return version;
     }

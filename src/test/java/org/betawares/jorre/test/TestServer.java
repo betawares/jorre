@@ -5,13 +5,14 @@ import io.netty.channel.ChannelId;
 import org.betawares.jorre.Server;
 import org.betawares.jorre.Version;
 import org.betawares.jorre.CommunicationException;
+import org.betawares.jorre.ServerInterface;
 import org.betawares.jorre.handlers.server.ServerHeartbeatHandler;
 
 /**
  *
  * @author BetaSteward
  */
-public class TestServer extends Server {
+public class TestServer extends Server implements ServerInterface {
 
     private static TestServer instance;
     
@@ -34,12 +35,12 @@ public class TestServer extends Server {
         return instance;
     }
         
-    @Override
-    public void pingTime(ChannelId channelId, long milliSeconds) {
-        logger.info("TestServer: Received pingTime: " + milliSeconds + ":" + channelId);
-        pingTime = milliSeconds;
-        pingCount++;
-    }
+//    @Override
+//    public void pingTime(ChannelId channelId, long milliSeconds) {
+//        logger.info("TestServer: Received pingTime: " + milliSeconds + ":" + channelId);
+//        pingTime = milliSeconds;
+//        pingCount++;
+//    }
     
     public long getPingTime() {
         return pingTime;
