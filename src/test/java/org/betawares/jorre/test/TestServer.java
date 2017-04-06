@@ -5,6 +5,7 @@ import io.netty.channel.ChannelId;
 import org.betawares.jorre.Server;
 import org.betawares.jorre.Version;
 import org.betawares.jorre.CommunicationException;
+import org.betawares.jorre.Connection;
 import org.betawares.jorre.ServerInterface;
 import org.betawares.jorre.handlers.server.ServerHeartbeatHandler;
 
@@ -26,7 +27,7 @@ public class TestServer extends Server implements ServerInterface {
     }
 
     public static void main(String[] args) throws Exception {
-        getInstance().start(1711, false);
+        getInstance().start(new Connection("", 1711));
     }
 
     public static TestServer getInstance() {
@@ -34,13 +35,6 @@ public class TestServer extends Server implements ServerInterface {
             instance = new TestServer();
         return instance;
     }
-        
-//    @Override
-//    public void pingTime(ChannelId channelId, long milliSeconds) {
-//        logger.info("TestServer: Received pingTime: " + milliSeconds + ":" + channelId);
-//        pingTime = milliSeconds;
-//        pingCount++;
-//    }
     
     public long getPingTime() {
         return pingTime;
@@ -59,12 +53,12 @@ public class TestServer extends Server implements ServerInterface {
     }
 
     @Override
-    public void clientRemoved(ChannelId channelId) {
+    public void clientWasRemoved(ChannelId channelId) {
         logger.info("TestServer: Removed client:" + channelId.asShortText());
     }
 
     @Override
-    public void serverShutdown() {
+    public void serverWasShutdown() {
         logger.info("TestServer: Server was shutdown");
     }
     
@@ -85,4 +79,5 @@ public class TestServer extends Server implements ServerInterface {
     public void setTestBoolean(boolean b) {
         testBoolean = b;
     }
+
 }

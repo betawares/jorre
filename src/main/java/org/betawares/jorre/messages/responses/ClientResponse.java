@@ -18,31 +18,33 @@
 
 package org.betawares.jorre.messages.responses;
 
-import java.util.UUID;
 import org.betawares.jorre.Client;
 import org.betawares.jorre.ClientInterface;
 import org.betawares.jorre.messages.Message;
 
 /**
  * Base class for all responses that will be returned to a {@link Client} in response
- * to a {@link Request}
+ * to a {@link ServerRequest}
  * 
  * @param <C> the type of {@link Client} that will be passed to the handler
  */
 public abstract class ClientResponse<C extends ClientInterface> extends Message {
     
-    private UUID id;
+    private long requestId;
     
-    public UUID id() {
-        return id;
+    public long requestId() {
+        return requestId;
     }
     
-    public void id(UUID id) {
-        this.id = id;
+    public void requestId(long requestId) {
+        this.requestId = requestId;
     }
 
     /**
-     * Handles client side processing for the {@link ClientResponse} 
+     * Handles client side processing for the {@link ClientResponse}.
+     * 
+     * This method will be called in response to an incoming {@link ClientResponse}.  Overriding
+     * classes will provide an implementation that handles the response.
      * 
      * @param client object that extends {@link Client} that can be referenced by the handler
      */

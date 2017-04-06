@@ -37,14 +37,6 @@ public class BooleanResponse<C extends ClientInterface> extends ClientResponse<C
         return b;
     }
     
-    /**
-     * Handles client side processing for responses.
-     * 
-     * This method will be called in response to an incoming {@link ClientResponse}.  Overriding
-     * classes will provide an implementation that handles the response.
-     * 
-     * @param client    {@link Client} object that can be referenced in the handler
-     */
     @Override
     public void handle(C client) {
         //default handler - override for specific implementation

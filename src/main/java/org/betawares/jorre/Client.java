@@ -35,6 +35,7 @@ import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.timeout.IdleStateHandler;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import javax.net.ssl.SSLException;
 
 import org.apache.log4j.Logger;
@@ -42,8 +43,9 @@ import org.betawares.jorre.handlers.PingMessageHandler;
 import org.betawares.jorre.handlers.PongMessageHandler;
 import org.betawares.jorre.handlers.client.ClientMessageHandler;
 import org.betawares.jorre.handlers.client.ClientHeartbeatHandler;
-import org.betawares.jorre.messages.Message;
-import org.betawares.jorre.messages.requests.Request;
+import org.betawares.jorre.handlers.client.ClientMessageInspector;
+import org.betawares.jorre.messages.requests.ServerMessage;
+import org.betawares.jorre.messages.requests.ServerRequest;
 import org.betawares.jorre.messages.responses.ClientResponse;
 import org.betawares.jorre.messages.responses.ResponseFuture;
 
@@ -51,19 +53,15 @@ import org.betawares.jorre.messages.responses.ResponseFuture;
 /**
  * Abstract base class for client implementations.
  * 
- * A client can connect to a server which is listening on a specified port
+ * Overriding classes should add methods for application specific features.
  * 
- * Uses Netty (see <a href="http://netty.io">http://netty.io</a>).
  * 
  */
 public abstract class Client implements ClientInterface {
 
-    private static final Logger logger = Logger.getLogger(Client.class);
+    protected static final Logger logger = Logger.getLogger(Client.class);
 
-    private static final int DEFAULT_IDLE_PING_TIME = 30;
-    private static final int DEFAULT_IDLE_TIMEOUT = 60;  
-
-    private final ClientMessageHandler clientMessageHandler;
+    private ClientMessageHandler clientMessageHandler;
     
     private final UUID id;
 
@@ -83,31 +81,16 @@ public abstract class Client implements ClientInterface {
         this.version = version;
         
         id = UUID.randomUUID();
-        clientMessageHandler = new ClientMessageHandler(this);
     }
 
     /**
-     * Starts the Server.
+     * Connect to a {@link Server} using the specified {@link Connection} settings.
      * 
-     * Shortcut method for {@link #connect(Connection, int, int)} with default idle time values.
-     * 
-     * @param connection    a {@link Connection} instance specifying the connection parameters
+     * @param connection    a {@link Connection} instance specifying the connection settings
      */
     public void connect(Connection connection) {
-        connect(connection, DEFAULT_IDLE_PING_TIME, DEFAULT_IDLE_TIMEOUT);
-    }
 
-    /**
-     * Connect to a {@link Server} using the specified {@link Connection} parameters
-     * 
-     * @param connection    a {@link Connection} instance specifying the connection parameters
-     * @param idlePingTime    number of seconds without communication from the {@link Server} before sending a ping message; 
-     *                        this value should be less than {@code idleTimeout}
-     * @param idleTimeout     number of seconds without communication from the {@link Server} before disconnecting
-     * 
-     */
-    public void connect(Connection connection, int idlePingTime, int idleTimeout) {
-
+        clientMessageHandler = new ClientMessageHandler(this, connection.getMaxResponseAge());
         group = new NioEventLoopGroup();
         try {
             if (connection.isSSL()) {
@@ -126,7 +109,14 @@ public abstract class Client implements ClientInterface {
                         }
                         ch.pipeline().addLast(new ObjectDecoder(10 * 1024 * 1024, ClassResolvers.cacheDisabled(null)));
                         ch.pipeline().addLast(new ObjectEncoder());
-                        ch.pipeline().addLast("idleStateHandler", new IdleStateHandler(idleTimeout, idlePingTime, 0));
+//                        ch.pipeline().addLast("messageInspector", new ClientMessageInspector());
+                        ch.pipeline().addLast("idleStateHandler", 
+                            new IdleStateHandler(
+                                connection.getIdleTimeout(), 
+                                connection.getIdlePingTime(), 
+                                0, 
+                                TimeUnit.MILLISECONDS)
+                        );
                         ch.pipeline().addLast("heartbeatHandler", new ClientHeartbeatHandler(Client.this));
                         ch.pipeline().addLast("pingMessageHandler", new PingMessageHandler());
                         ch.pipeline().addLast("pongMessageHandler", new PongMessageHandler());
@@ -152,61 +142,72 @@ public abstract class Client implements ClientInterface {
     
     @Override
     public void disconnect(DisconnectReason reason, boolean error) {
-
         try {
             if (channel.isActive()) {
                 channel.disconnect().sync();
-                disconnected(reason, error);
             }
         } catch (InterruptedException ex) {
             logger.fatal("Error disconnecting", ex);
         }
         finally {
+            disconnected(reason, error);
             group.shutdownGracefully();
         }
     }
 
     /**
-     * Returns a boolean indicating whether the client is connected to a server or not
+     * Returns a boolean indicating whether the client is connected to a server 
+     * and the client has been registered with that server
      * 
-     * @return flag indicating connection status
+     * @return {@code true} if the client is connected
      */
     public boolean isConnected() {
-        if (channel != null) {
-            return channel.isActive();
+        if (clientMessageHandler != null && clientMessageHandler.isConnected()) {
+            if (channel != null) {
+                return channel.isActive();
+            }
         }
         return false;
     }
     
     /**
-     * Send a {@link Message} to the server
+     * Send a {@link ServerMessage} to the server
      * 
-     * @param message   the {@link Message} to send to the server
+     * @param message   the {@link ServerMessage} to send to the server
      * @throws CommunicationException thrown if there is an error while sending the message
      */
-    public void sendMessage(Message message) throws CommunicationException {
+    public void sendMessage(ServerMessage message) throws CommunicationException {
+        if (clientMessageHandler == null) {
+            throw new CommunicationException("Not connected");
+        }
         clientMessageHandler.sendMessage(message);
     }
 
     /**
-     * Send a {@link Request} to the server and return a {@link ResponseFuture}
+     * Send a {@link ServerRequest} to the server and return a {@link ResponseFuture}
      * 
-     * @param request   the {@link Request} to send to the server
+     * @param request   the {@link ServerRequest} to send to the server
      * @return  returns a {@link ResponseFuture} for the request
      * @throws CommunicationException thrown if there is an error while sending the request
      */
-    public ResponseFuture sendRequest(Request request) throws CommunicationException {
+    public ResponseFuture sendRequest(ServerRequest request) throws CommunicationException {
+        if (clientMessageHandler == null) {
+            throw new CommunicationException("Not connected");
+        }        
         return clientMessageHandler.sendRequest(request);
     }
 
     /**
-     * Send a {@link Request} to the server and wait for a {@link ClientResponse}
+     * Send a {@link ServerRequest} to the server and wait for a {@link ClientResponse}
      * 
-     * @param request   the {@link Request} to send to the server
+     * @param request   the {@link ServerRequest} to send to the server
      * @return  returns the {@link ClientResponse} sent back from the server
      * @throws CommunicationException thrown if there is an error while sending the request or receiving the response
      */
-    public ClientResponse sendBlockingRequest(Request request) throws CommunicationException {
+    public ClientResponse sendBlockingRequest(ServerRequest request) throws CommunicationException {
+        if (clientMessageHandler == null) {
+            throw new CommunicationException("Not connected");
+        }        
         try {
             return clientMessageHandler.sendRequest(request).get();
         } catch (InterruptedException | ExecutionException ex) {
@@ -228,7 +229,14 @@ public abstract class Client implements ClientInterface {
         return channel;
     }
 
+    @Override
     public Version version() {
         return version;
     }
+
+    @Override
+    public void handleException(String message, Exception ex) {
+        logger.error(message, ex);  // default implementation; override for a more specific implementation
+    }
+
 }

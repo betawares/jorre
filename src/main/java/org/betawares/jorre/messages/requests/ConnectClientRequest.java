@@ -22,6 +22,8 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.betawares.jorre.CommunicationException;
 import org.betawares.jorre.DisconnectReason;
 import org.betawares.jorre.Server;
@@ -33,12 +35,14 @@ import org.betawares.jorre.messages.responses.ConnectClientResponse;
  *
  * Handles {@link Client} connection requests.
  * 
- * The request is rejected if there is a version mismatch between the {@link Client} and the {@link Server}.
+ * The request is rejected if there is a version mismatch between the 
+ * {@link Client} and the {@link Server}.
  * 
- * If successful then the server is informed by calling {@code addClient} and a {@link ConnectClientResponse} is sent as a response.
+ * If successful then the server is informed by calling {@code addClient} and a 
+ * {@link ConnectClientResponse} is sent as a response.
  * 
  */
-public class ConnectClientRequest extends Request {
+public class ConnectClientRequest extends ServerRequest {
     
     private final UUID clientId;
     private final Version clientVersion;
@@ -49,16 +53,20 @@ public class ConnectClientRequest extends Request {
     }
     
     @Override
-    public void handle(ServerInterface server, ChannelHandlerContext ctx) throws CommunicationException {
+    public void handle(ServerInterface server, ChannelHandlerContext ctx) {
         Version version = server.version();
-        if (version.compareTo(clientVersion) == 0) {
-            server.addClient(clientId, ctx.channel().id());
-            respond(ctx, new ConnectClientResponse(version));
-        }
-        else {
-            logger.error("Version mismatch");
-            respond(ctx, new ConnectClientResponse(new Version()));  // send poison pill
-            server.disconnectClient(ctx.channel().id(), DisconnectReason.ValidationError);
+        try {
+            if (version.compareTo(clientVersion) == 0) {
+                server.addClient(clientId, ctx.channel().id());
+                respond(new ConnectClientResponse(version), ctx);
+            }
+            else {
+                logger.error("Version mismatch between Client and Server.  Server version:" + version + "  Client version:" + clientVersion);
+                respond(new ConnectClientResponse(new Version()), ctx);  // respond with invalid version
+                server.disconnectClient(ctx.channel().id(), DisconnectReason.VersionMismatch);
+            }
+        } catch (CommunicationException ex) {
+            server.handleException("Error handling a connection request:", ex);
         }
     }
     
@@ -66,8 +74,8 @@ public class ConnectClientRequest extends Request {
         return clientId;
     }
 
-    private void respond(ChannelHandlerContext ctx, ConnectClientResponse response) {
-        response.id(id);
+    private void respond(ConnectClientResponse response, ChannelHandlerContext ctx) {
+        response.requestId(id);
         if (!ctx.channel().isActive()) {
             logger.error("Connection is not active");
             return;

@@ -20,8 +20,8 @@ package org.betawares.jorre.messages.requests;
 
 import io.netty.channel.ChannelHandlerContext;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicLong;
 import org.apache.log4j.Logger;
-import org.betawares.jorre.CommunicationException;
 import org.betawares.jorre.Server;
 import org.betawares.jorre.ServerInterface;
 import org.betawares.jorre.messages.Message;
@@ -32,15 +32,16 @@ import org.betawares.jorre.messages.Message;
  * Overriding classes should provide a server type that extends {@link Server}.
  * Overriding classes must implement the {@code handle} method. 
  *  
- * @param <S> the type of Server that will be processing the Message
+ * @param <S> the type of Server that will be processing the {@link ServerMessage}
  */
 public abstract class ServerMessage<S extends ServerInterface> extends Message {
         
     protected static final Logger logger = Logger.getLogger(ServerMessage.class);
 
-    protected final UUID id = UUID.randomUUID();
+    private static final AtomicLong NEXT_ID = new AtomicLong(0);
+    protected final long id = NEXT_ID.getAndIncrement();
     
-    public UUID id() {
+    public long id() {
         return id;
     }
     
@@ -52,8 +53,7 @@ public abstract class ServerMessage<S extends ServerInterface> extends Message {
      * 
      * @param server    {@link Server} object that can be referenced in the handler
      * @param ctx       the {@link ChannelHandlerContext} for the {@link Channel} to the {@link Client}
-     * @throws CommunicationException if there is an error while handling the message
      */
-    public abstract void handle(S server, ChannelHandlerContext ctx) throws CommunicationException;
+    public abstract void handle(S server, ChannelHandlerContext ctx);
         
 }

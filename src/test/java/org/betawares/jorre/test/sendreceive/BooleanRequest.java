@@ -1,8 +1,6 @@
 package org.betawares.jorre.test.sendreceive;
 
 import io.netty.channel.ChannelHandlerContext;
-import org.betawares.jorre.Server;
-import org.betawares.jorre.CommunicationException;
 import org.betawares.jorre.messages.requests.ServerMessage;
 import org.betawares.jorre.test.TestServer;
 

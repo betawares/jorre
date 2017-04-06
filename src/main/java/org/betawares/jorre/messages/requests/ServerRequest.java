@@ -38,9 +38,9 @@ import org.betawares.jorre.messages.responses.ClientResponse;
  * The convenience method {@code respond} can be used to return results to the {@link Client}
  * 
  * @param <S> the type of Server that will be generating the response
- * @param <C> the type of Client that will be processing the response
+ * @param <C> the type of Client that will be handling the response
  */
-public abstract class Request<S extends ServerInterface, C extends ClientInterface> extends ServerMessage<S> {
+public abstract class ServerRequest<S extends ServerInterface, C extends ClientInterface> extends ServerMessage<S> {
         
     /**
      * Send a response to the {@link Client}.
@@ -52,7 +52,7 @@ public abstract class Request<S extends ServerInterface, C extends ClientInterfa
      */
     protected void respond(ClientResponse<C> response, ChannelHandlerContext ctx) throws CommunicationException {
         // set the reponse id to be the same as the request to that they can be matched
-        response.id(id);
+        response.requestId(id);
         if (!ctx.channel().isActive()) {
             logger.error("Connection is not active");
             throw new CommunicationException("No connection to client");

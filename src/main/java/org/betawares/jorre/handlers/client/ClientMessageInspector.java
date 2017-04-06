@@ -16,24 +16,24 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-package org.betawares.jorre.messages.callback;
+package org.betawares.jorre.handlers.client;
 
-import org.betawares.jorre.Client;
-import org.betawares.jorre.ClientInterface;
-import org.betawares.jorre.messages.Message;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.SimpleChannelInboundHandler;
+import org.apache.log4j.Logger;
 
 /**
- * Base class for callbacks.  Callbacks are messages sent from a server to a client with no expected response
- * 
- * @param <C> the type of Client that will be passed to the handle method
+ * Logs each incoming message then passes it to the next handler in the pipeline.
  */
-public abstract class ClientCallback<C extends ClientInterface> extends Message {
-    
-    /**
-     * Handler for client callbacks.
-     * 
-     * @param client {@link Client} that 
-     */
-    public abstract void handle(C client);
+public class ClientMessageInspector extends SimpleChannelInboundHandler {
 
+    private static final Logger logger = Logger.getLogger(ClientMessageInspector.class);
+    
+    @Override
+    protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
+        logger.info(msg);
+        ctx.fireChannelRead(msg);
+    }
+
+    
 }

@@ -27,5 +27,13 @@ import java.util.concurrent.CompletableFuture;
  */
 public class ResponseFuture extends CompletableFuture<ClientResponse>  {
 
+    private final long created_ts = System.currentTimeMillis();
     
+    /**
+     * 
+     * @return the age of this {@code Future} in milliseconds
+     */
+    public long age() {
+        return System.currentTimeMillis() - created_ts;
+    }
 }

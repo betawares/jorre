@@ -22,7 +22,6 @@ import org.betawares.jorre.Client;
 import org.betawares.jorre.ClientInterface;
 import org.betawares.jorre.DisconnectReason;
 import org.betawares.jorre.Version;
-import org.betawares.jorre.CommunicationException;
 
 /**
  * Response object that returns a {@link Version} value from a {@link ConnectClientRequest}
@@ -42,9 +41,10 @@ public class ConnectClientResponse<C extends ClientInterface> extends ClientResp
     }
 
     /**
-     * Checks the {@link Client} version against the {@link Server} version. 
+     * Checks the {@link Client} version against the {@link Server} version.
      * 
-     * If they don't match then the {@link Client} is disconnected 
+     * If they match then the client is notified by calling the {@code connected} method.
+     * If they don't match then the {@link Client} is disconnected.
      * 
      * @param client {@link Client} object that will be notified if successful or disconnected if the versions don't match
      */

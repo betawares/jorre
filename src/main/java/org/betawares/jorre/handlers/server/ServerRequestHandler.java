@@ -21,17 +21,17 @@ package org.betawares.jorre.handlers.server;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import org.apache.log4j.Logger;
-import org.betawares.jorre.CommunicationException;
-import org.betawares.jorre.Server;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 import org.betawares.jorre.ServerInterface;
 import org.betawares.jorre.messages.requests.ServerMessage;
-import org.betawares.jorre.messages.requests.Request;
+import org.betawares.jorre.messages.requests.ServerRequest;
 
 /**
- * Handles incoming {@link ServerMessage} messages.  This class will be shared amongst all client channels.
+ * Handles incoming {@link ServerMessage} messages.  This class will be shared amongst 
+ * all client channels.
  * 
- * Executes the {@code handle} method of the {@link Request}
+ * Executes the {@code handle} method of the {@link ServerRequest}
  * 
  * Informs server when a client needs to be removed
  * 
@@ -40,27 +40,26 @@ import org.betawares.jorre.messages.requests.Request;
 @Sharable
 public class ServerRequestHandler<S extends ServerInterface> extends SimpleChannelInboundHandler<ServerMessage<S>> {
             
-    private static final Logger logger = Logger.getLogger(ServerRequestHandler.class);
-
-    private final S server;
+    // thread pool for handling responses
+    private static final ThreadPoolExecutor requestExecutor = (ThreadPoolExecutor) Executors.newCachedThreadPool();
     
+    private final S server;
+
     public ServerRequestHandler(S server) {
         this.server = server;
     }
 
     @Override
     public void channelRead0(ChannelHandlerContext ctx, ServerMessage<S> msg) {
-        try {
-            msg.setReceivedTS();
+        msg.setReceivedTS();
+        requestExecutor.execute(() -> {
             msg.handle(server, ctx);
-        } catch (CommunicationException ex) {
-            logger.error("Error handling message:", ex);
-        }
+        });
     }
     
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        server.clientRemoved(ctx.channel().id());
+        server.clientWasRemoved(ctx.channel().id());
     }
     
 }

@@ -26,73 +26,66 @@ import java.net.SocketException;
 import java.util.Enumeration;
 
 /**
- * The class <code>Connection</code> contains the specific parameters required 
- * to establish a connection to a remote listening peer.
+ * The class {@code Connection} contains the specific settings required 
+ * to establish a connection to a (@link Server).
  * 
  */
 public class Connection {
 
-    private String host;
-    private int port;
-    private boolean ssl;
-    private ProxyType proxyType;
-    private String proxyHost;
-    private int proxyPort;
-    private String proxyUsername;
-    private String proxyPassword;
-
+    public static final long DEFAULT_MAX_RESPONSE_AGE = 5000;
+    public static final long DEFAULT_IDLE_PING_TIME = 30000;
+    public static final long DEFAULT_IDLE_TIMEOUT = 60000;  
+    
+    private final String host;
+    private final int port;
+    private boolean ssl = false;
+        
+    private long maxResponseAge = DEFAULT_MAX_RESPONSE_AGE; 
+    private long idlePingTime = DEFAULT_IDLE_PING_TIME;
+    private long idleTimeout = DEFAULT_IDLE_TIMEOUT;
+        
+    /**
+     * Creates a Connection object with default values for ssl, maxResponseAge, 
+     * ildePingTime and idleTimeout.
+     * 
+     * @param host    the address of the server
+     * @param port    the port that the server is listening on
+     */
     public Connection(String host, int port) {
+        this(host, port, false, DEFAULT_MAX_RESPONSE_AGE, DEFAULT_IDLE_PING_TIME, DEFAULT_IDLE_TIMEOUT);
+    }
+
+    /**
+     * 
+     * @param host    the address of the server
+     * @param port    the port that the server is listening on
+     * @param ssl     if true ssl will be enabled
+     * @param maxResponseAge
+     *            number of milliseconds to wait for a {@link ClientResponse};
+     *            after this time elapses a {@link CommunicationException} is generated
+     * @param idlePingTime    
+     *            number of milliseconds without communication from the {@link Server} 
+     *            before sending a {@link Ping} message; 
+     *            this value should be less than {@code idleTimeout}
+     * @param idleTimeout
+     *            number of milliseconds without communication from the {@link Server} 
+     *            before it is disconnected
+     */
+    public Connection(String host, int port, boolean ssl, long maxResponseAge, long idlePingTime, long idleTimeout) {
         this.host = host;
         this.port = port;
+        this.ssl = ssl;
+        this.maxResponseAge = maxResponseAge;
+        this.idlePingTime = idlePingTime;
+        this.idleTimeout = idleTimeout;
     }
     
-    public ProxyType getProxyType() {
-        return proxyType;
-    }
-
-    public void setProxyType(ProxyType proxyType) {
-        this.proxyType = proxyType;
-    }
-
-    public enum ProxyType {
-
-        SOCKS("Socks"), HTTP("HTTP"), NONE("None");
-
-        private final String text;
-
-        ProxyType(String text) {
-            this.text = text;
-        }
-
-        @Override
-        public String toString() {
-            return text;
-        }
-
-        public static ProxyType valueByText(String value) {
-            for (ProxyType type : values()) {
-                if (type.text.equals(value)) {
-                    return type;
-                }
-            }
-            return NONE;
-        }
-    }
-
     public String getHost() {
         return host;
     }
 
-    public void setHost(String host) {
-        this.host = host;
-    }
-
     public int getPort() {
         return port;
-    }
-
-    public void setPort(int port) {
-        this.port = port;
     }
 
     public boolean isSSL() {
@@ -102,37 +95,29 @@ public class Connection {
     public void setSSL(boolean ssl) {
         this.ssl = ssl;
     }
-
-    public String getProxyHost() {
-        return proxyHost;
+    
+    public long getMaxResponseAge() {
+        return maxResponseAge;
     }
 
-    public void setProxyHost(String proxyHost) {
-        this.proxyHost = proxyHost;
+    public void setMaxResponseAge(long maxResponseAge) {
+        this.maxResponseAge = maxResponseAge;
     }
 
-    public int getProxyPort() {
-        return proxyPort;
+    public long getIdlePingTime() {
+        return idlePingTime;
     }
 
-    public void setProxyPort(int proxyPort) {
-        this.proxyPort = proxyPort;
+    public void setIdlePingTime(long idlePingTime) {
+        this.idlePingTime = idlePingTime;
     }
 
-    public String getProxyUsername() {
-        return proxyUsername;
+    public long getIdleTimeout() {
+        return idleTimeout;
     }
 
-    public void setProxyUsername(String proxyUsername) {
-        this.proxyUsername = proxyUsername;
-    }
-
-    public String getProxyPassword() {
-        return proxyPassword;
-    }
-
-    public void setProxyPassword(String proxyPassword) {
-        this.proxyPassword = proxyPassword;
+    public void setIdleTimeout(long idleTimeout) {
+        this.idleTimeout = idleTimeout;
     }
 
     public static InetAddress getLocalAddress() throws SocketException {

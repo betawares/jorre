@@ -1,16 +1,9 @@
 package org.betawares.jorre.test;
 
-import org.apache.log4j.Logger;
-import org.betawares.jorre.Client;
 import org.betawares.jorre.DisconnectReason;
 import org.betawares.jorre.Version;
 
-/**
- *
- * @author BetaSteward
- */
 public class TestClientBadVersion extends TestClient {
-    private static final Logger logger = Logger.getLogger(TestClientBadVersion.class);
 
     private Boolean test;
     
@@ -28,10 +21,12 @@ public class TestClientBadVersion extends TestClient {
         logger.info("TestClient: Disconnect recieved - " + error);
     }
 
+    @Override
     public void setBoolean(boolean b) {
         test = b;
     }
     
+    @Override
     public Boolean getBooleanTest() {
         return test;
     }

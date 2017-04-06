@@ -47,6 +47,7 @@ import io.netty.util.concurrent.GlobalEventExecutor;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 import org.betawares.jorre.handlers.PingMessageHandler;
@@ -60,9 +61,9 @@ import org.betawares.jorre.messages.callback.ClientCallback;
  * Abstract base class for server implementations.
  * 
  * A Server will listen on a specified port for incoming connections from a {@link Client}
- * 
- * Uses Netty (see <a href="http://netty.io">http://netty.io</a>).
  *
+ * Overriding classes should add methods for application specific features.
+ * 
  */
 public abstract class Server implements ServerInterface {
 
@@ -78,7 +79,7 @@ public abstract class Server implements ServerInterface {
 
     private final EventExecutorGroup handlersExecutor = new DefaultEventExecutorGroup(Runtime.getRuntime().availableProcessors() * 2);
     
-    // sharable handlers
+    // sharable handlers - these handlers will be shared by all client connections
     private final ServerRequestHandler serverRequestHandler;
     private final ServerExceptionHandler exceptionHandler;
     private final PingMessageHandler pingMessageHandler = new PingMessageHandler();
@@ -98,48 +99,23 @@ public abstract class Server implements ServerInterface {
         exceptionHandler = new ServerExceptionHandler(this);
     }
 
-    /**
-     * Returns the version of the Server implementation.
-     * A {@link Server} will not communicate with a {@link Client} unless they
-     * both have the same version.
-     * 
-     * @return the {@link Version} of the {@link Server} implementation
-     */
     @Override
     public Version version() {
         return version;
     }
     
     /**
-     * Starts the Server.
+     * Starts the Server with the specified {@link Connection} settings.
      * 
-     * Shortcut method for {@link #start(int, boolean, int, int)} with default idle time values.
+     * @param connection  a {@link Connection} instance specifying the connection settings
      * 
-     * @param port  the port that the server will listen on
-     * @param ssl   boolean flag indicating whether ssl should be used
-     * @throws Exception 
+     * @throws Exception  thrown if there is an error starting the server
      */
-    public void start(int port, boolean ssl) throws Exception {
-        start(port, ssl, DEFAULT_IDLE_PING_TIME, DEFAULT_IDLE_TIMEOUT);
-    }
-
-    
-    /**
-     * Starts the Server.
-     * 
-     * @param port  the port that the server will listen on
-     * @param ssl   boolean flag indicating whether ssl should be used
-     * @param idlePingTime    number of seconds without communication from a {@link Client} before sending a ping message; 
-     *                        this value should be less than {@code idleTimeout}
-     * @param idleTimeout     number of seconds without communication from a {@link Client} before it is disconnected
-
-     * @throws Exception 
-     */
-    public void start(int port, boolean ssl, int idlePingTime, int idleTimeout) throws Exception {
+    public void start(Connection connection) throws Exception {
 
         SslContext sslCtx;
 
-        if (ssl) {
+        if (connection.isSSL()) {
             SelfSignedCertificate ssc = new SelfSignedCertificate();
             sslCtx = SslContextBuilder.forServer(ssc.certificate(), ssc.privateKey()).build();
         } else {
@@ -161,9 +137,13 @@ public abstract class Server implements ServerInterface {
                     }
                     ch.pipeline().addLast(new ObjectDecoder(10 * 1024 * 1024, ClassResolvers.cacheDisabled(null)));
                     ch.pipeline().addLast(encoder);
-
-                    ch.pipeline().addLast("idleStateHandler", new IdleStateHandler(idleTimeout, idlePingTime, 0));
-
+                    ch.pipeline().addLast("idleStateHandler", 
+                        new IdleStateHandler(
+                            connection.getIdleTimeout(), 
+                            connection.getIdlePingTime(), 
+                            0, 
+                            TimeUnit.MILLISECONDS)
+                    );
                     ch.pipeline().addLast(handlersExecutor, "heartbeatHandler", new ServerHeartbeatHandler(Server.this));
                     ch.pipeline().addLast("pingMessageHandler", pingMessageHandler);
                     ch.pipeline().addLast("pongMessageHandler", pongMessageHandler);
@@ -180,7 +160,7 @@ public abstract class Server implements ServerInterface {
                     ch.pipeline().addLast("exceptionHandler", exceptionHandler);
                 }
             });
-        bootstrap.bind(port).sync();
+        bootstrap.bind(connection.getPort()).sync();
             
     }
 
@@ -191,21 +171,24 @@ public abstract class Server implements ServerInterface {
         handlersExecutor.shutdownGracefully();
         bossGroup.shutdownGracefully();
         workerGroup.shutdownGracefully();
-        serverShutdown();
+        serverWasShutdown();
     }
     
     /**
      * Adds a client to the client/channel mapping.  This mapping is used to lookup
      * a channel when only the clientId is known.
      * 
+     * Overriding classes should always call {@code super.addClient}
+     * 
      * @param clientId      unique identifier for the client
      * @param channelId     {@link ChannelId} of the client
      * @throws CommunicationException thrown if the {@link ChannelId} does not exist
      */
+    @Override
     public void addClient(UUID clientId, ChannelId channelId) throws CommunicationException {
         Channel channel = clients.find(channelId);
         if (channel == null)
-            throw new CommunicationException("Invalid channelId during addClient");
+            throw new CommunicationException("Invalid channelId during addClient.");
         this.clientIdToChannel.put(clientId, channel);
     }
 
@@ -230,12 +213,15 @@ public abstract class Server implements ServerInterface {
     }
     
     /**
-     * Disconnect the specified client from the server.
+     * Disconnect the specified client from the server.  
+     * 
+     * Overriding classes should always call this super-class implementation.
      * 
      * @param channelId the {@link ChannelId} identifying the client
      * @param reason    the reason that the disconnect is occurring
-     * @throws CommunicationException 
+     * @throws CommunicationException thrown if there is an error while disconnecting the client
      */
+    @Override
     public void disconnectClient(ChannelId channelId, DisconnectReason reason) throws CommunicationException {
         Channel channel = clients.find(channelId);
         if (channel == null)
@@ -271,7 +257,11 @@ public abstract class Server implements ServerInterface {
                 throw new CommunicationException("Communication error during callback", future.cause());
             }
         });
-
     }
 
+    @Override
+    public void handleException(String message, Exception ex) {
+        logger.error(message, ex);  // default implementation; override for a more application specific implementation
+    }
+    
 }

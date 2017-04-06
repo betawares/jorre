@@ -1,10 +1,10 @@
-package org.betawares.jorre.example.chat.server;
+package org.betawares.jorre.example.chat.protocol;
 
 import java.util.UUID;
 import org.betawares.jorre.messages.callback.ClientCallback;
 
 
-public class ChatMessageCallback extends ClientCallback<ChatClient> {
+public class ChatMessageCallback extends ClientCallback<ChatClientInterface> {
     
     private final UUID chatId;
     private final String userName;
@@ -17,7 +17,7 @@ public class ChatMessageCallback extends ClientCallback<ChatClient> {
     }
 
     @Override
-    public void handle(ChatClient client) {
+    public void handle(ChatClientInterface client) {
         client.receiveChatMesage(chatId, userName, message);
     }
     
