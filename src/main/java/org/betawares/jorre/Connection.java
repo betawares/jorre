@@ -18,13 +18,6 @@
 
 package org.betawares.jorre;
 
-import java.net.Inet4Address;
-import java.net.InetAddress;
-import java.net.InterfaceAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.util.Enumeration;
-
 /**
  * The class {@code Connection} contains the specific settings required 
  * to establish a connection to a (@link Server).
@@ -34,7 +27,8 @@ public class Connection {
 
     public static final long DEFAULT_MAX_RESPONSE_AGE = 5000;
     public static final long DEFAULT_IDLE_PING_TIME = 30000;
-    public static final long DEFAULT_IDLE_TIMEOUT = 60000;  
+    public static final long DEFAULT_IDLE_TIMEOUT = 60000;
+    public static final int DEFAULT_CONNECTION_TIMEOUT = 60000;
     
     private final String host;
     private final int port;
@@ -43,6 +37,7 @@ public class Connection {
     private long maxResponseAge = DEFAULT_MAX_RESPONSE_AGE; 
     private long idlePingTime = DEFAULT_IDLE_PING_TIME;
     private long idleTimeout = DEFAULT_IDLE_TIMEOUT;
+    private int connectionTimeout = DEFAULT_CONNECTION_TIMEOUT;
         
     /**
      * Creates a Connection object with default values for ssl, maxResponseAge, 
@@ -52,7 +47,7 @@ public class Connection {
      * @param port    the port that the server is listening on
      */
     public Connection(String host, int port) {
-        this(host, port, false, DEFAULT_MAX_RESPONSE_AGE, DEFAULT_IDLE_PING_TIME, DEFAULT_IDLE_TIMEOUT);
+        this(host, port, false, DEFAULT_MAX_RESPONSE_AGE, DEFAULT_IDLE_PING_TIME, DEFAULT_IDLE_TIMEOUT, DEFAULT_CONNECTION_TIMEOUT);
     }
 
     /**
@@ -70,14 +65,18 @@ public class Connection {
      * @param idleTimeout
      *            number of milliseconds without communication from the {@link Server} 
      *            before it is disconnected
+     * @param connectionTimeout
+     *            number of milliseconds to attempt a connection to the {@link Server} 
+     *            before it is abandoned
      */
-    public Connection(String host, int port, boolean ssl, long maxResponseAge, long idlePingTime, long idleTimeout) {
+    public Connection(String host, int port, boolean ssl, long maxResponseAge, long idlePingTime, long idleTimeout, int connectionTimeout) {
         this.host = host;
         this.port = port;
         this.ssl = ssl;
         this.maxResponseAge = maxResponseAge;
         this.idlePingTime = idlePingTime;
         this.idleTimeout = idleTimeout;
+        this.connectionTimeout = connectionTimeout;
     }
     
     public String getHost() {
@@ -120,22 +119,12 @@ public class Connection {
         this.idleTimeout = idleTimeout;
     }
 
-    public static InetAddress getLocalAddress() throws SocketException {
-        for (Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces(); interfaces.hasMoreElements();) {
-            NetworkInterface iface = interfaces.nextElement();
-            if (iface.isLoopback()) {
-                continue;
-            }
-            for (InterfaceAddress addr : iface.getInterfaceAddresses()) {
-                if (addr != null) {
-                    InetAddress iaddr = addr.getAddress();
-                    if (iaddr != null && iaddr instanceof Inet4Address) {
-                        return iaddr;
-                    }
-                }
-            }
-        }
-        return null;
+    public int getConnectionTimeout() {
+        return connectionTimeout;
+    }
+
+    public void setConnectionTimeout(int connectionTimeout) {
+        this.connectionTimeout = connectionTimeout;
     }
 
 }

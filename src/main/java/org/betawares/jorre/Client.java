@@ -20,9 +20,11 @@ package org.betawares.jorre;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
@@ -84,11 +86,13 @@ public abstract class Client implements ClientInterface {
     }
 
     /**
-     * Connect to a {@link Server} using the specified {@link Connection} settings.
+     * Connect to a {@link Server} using the specified {@link Connection} settings.  This call
+     * will block until successful or an exception is thrown.
      * 
      * @param connection    a {@link Connection} instance specifying the connection settings
+     * @return true if the connection was successful, false otherwise
      */
-    public void connect(Connection connection) {
+    public boolean connect(Connection connection) {
 
         clientMessageHandler = new ClientMessageHandler(this, connection.getMaxResponseAge());
         group = new NioEventLoopGroup();
@@ -133,11 +137,15 @@ public abstract class Client implements ClientInterface {
                     }
                 });
 
-            channel = bootstrap.connect(connection.getHost(), connection.getPort()).sync().channel();
+            bootstrap.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, connection.getConnectionTimeout());
+            ChannelFuture future = bootstrap.connect(connection.getHost(), connection.getPort());
+            channel = future.sync().channel();
+            return true;
         } catch (SSLException | InterruptedException ex) {
             logger.fatal("Error connecting", ex);
             disconnect(DisconnectReason.IOError, true);
         }
+        return false;
     }
     
     @Override
